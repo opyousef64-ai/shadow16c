@@ -1,0 +1,2397 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow 15C AI Trading System - نظام تداول ذكي</title>
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="Shadow 15C AI Trading System - نظام تداول ذكي باستخدام الذكاء الاصطناعي">
+    <meta name="keywords" content="تداول ذكي, AI Trading, XAUUSD, Shadow 15C">
+    <meta name="author" content="Shadow 15C Team">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #e94560;
+            --secondary-color: #00d9ff;
+            --accent-color: #ffd700;
+            --dark-bg: #0a0e27;
+            --darker-bg: #050814;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8b8;
+            --gradient-primary: linear-gradient(135deg, #e94560 0%, #c73e54 100%);
+            --gradient-secondary: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+        }
+
+        body {
+            font-family: 'Cairo', 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Loading Screen */
+        #loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 99999;
+            background: var(--dark-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+
+        #loader-wrapper.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader-logo {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #e94560, #00d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        #loader {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(233, 69, 96, 0.3);
+            border-top: 5px solid #e94560;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loader-text {
+            margin-top: 2rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 2px solid rgba(233, 69, 96, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            padding: 0.8rem 5%;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #e94560 0%, #00d9ff 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            color: white;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(360deg) scale(1.1);
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #e94560, #00d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 5% 80px;
+            background: radial-gradient(circle at top right, rgba(233, 69, 96, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at bottom left, rgba(0, 217, 255, 0.1) 0%, transparent 50%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(233, 69, 96, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -200px;
+            right: -200px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        .hero-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #e94560 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-bottom: 2.5rem;
+        }
+
+        .features-list li {
+            padding: 0.75rem 0;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+        }
+
+        .features-list li::before {
+            content: '✓';
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(233, 69, 96, 0.6);
+        }
+
+        /* Hero Image - Using Unsplash for reliable image */
+        .hero-image {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(233, 69, 96, 0.3);
+            border: 3px solid rgba(233, 69, 96, 0.3);
+        }
+
+        .hero-image img {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        /* Sections General */
+        section {
+            padding: 100px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            margin-bottom: 4rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* About Section */
+        #about {
+            background: linear-gradient(180deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            line-height: 1.9;
+        }
+
+        .about-image {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 217, 255, 0.2);
+            border: 2px solid rgba(0, 217, 255, 0.3);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        /* Why Us Section */
+        #why-us {
+            background: var(--darker-bg);
+        }
+
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .why-card {
+            background: var(--card-bg);
+            padding: 3rem 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .why-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .why-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(233, 69, 96, 0.25);
+            border-color: rgba(233, 69, 96, 0.3);
+        }
+
+        .why-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .why-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .why-card h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .why-card p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        /* Testimonials Section */
+        #testimonials {
+            background: var(--dark-bg);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .testimonial-card {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 217, 255, 0.15);
+            border-color: rgba(0, 217, 255, 0.3);
+        }
+
+        .quote-icon {
+            font-size: 3rem;
+            color: var(--accent-color);
+            opacity: 0.3;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-text {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #00d9ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .author-info h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+
+        .author-info span {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Pricing Section */
+        #pricing {
+            background: linear-gradient(180deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .pricing-card {
+            background: var(--card-bg);
+            padding: 3rem 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .pricing-card.featured {
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+            box-shadow: 0 20px 60px rgba(233, 69, 96, 0.3);
+        }
+
+        .pricing-card.featured::before {
+            content: '⭐ الأكثر شعبية';
+            position: absolute;
+            top: -12px;
+            right: 50%;
+            transform: translateX(50%);
+            background: var(--gradient-primary);
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+
+        .plan-name {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .plan-price {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-price span {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .plan-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .plan-features {
+            list-style: none;
+            text-align: right;
+            margin-bottom: 2rem;
+        }
+
+        .plan-features li {
+            padding: 0.6rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .plan-features li::before {
+            content: '✓';
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .plan-button {
+            width: 100%;
+            padding: 1rem 2rem;
+            border: 2px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .pricing-card.featured .plan-button {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+        }
+
+        .plan-button:hover {
+            background: var(--gradient-primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
+        }
+
+        /* Security Section */
+        #security {
+            background: var(--dark-bg);
+        }
+
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .security-item {
+            background: var(--card-bg);
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+            border-right: 4px solid var(--secondary-color);
+            transition: all 0.3s ease;
+        }
+
+        .security-item:hover {
+            transform: translateX(-10px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
+        }
+
+        .security-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .security-item h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+            color: var(--secondary-color);
+        }
+
+        .security-item p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        /* Demo Section - Changed to Working Video/Image */
+        #demo {
+            background: linear-gradient(180deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
+            text-align: center;
+        }
+
+        .demo-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .demo-box {
+            background: var(--card-bg);
+            border: 2px solid rgba(233, 69, 96, 0.3);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            margin-top: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient-primary);
+        }
+
+        /* Demo Image/Video Container */
+        .demo-media {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            background: #000;
+            position: relative;
+        }
+
+        .demo-media img,
+        .demo-media video,
+        .demo-media iframe {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border: none;
+        }
+
+        .demo-text {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .demo-button {
+            display: inline-block;
+            padding: 1.2rem 3rem;
+            background: var(--gradient-secondary);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .demo-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 217, 255, 0.6);
+        }
+
+        /* AI System Architecture */
+        #ai-system {
+            background: var(--dark-bg);
+        }
+
+        .architecture-layers {
+            display: grid;
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .layer-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+            padding: 3rem;
+            border-radius: 20px;
+            border-right: 5px solid;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .layer-card:nth-child(1) { border-color: #e94560; }
+        .layer-card:nth-child(2) { border-color: #00d9ff; }
+        .layer-card:nth-child(3) { border-color: #27ae60; }
+
+        .layer-card:hover {
+            transform: translateX(-10px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .layer-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .layer-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .layer-card:nth-child(1) .layer-title { color: #e94560; }
+        .layer-card:nth-child(2) .layer-title { color: #00d9ff; }
+        .layer-card:nth-child(3) .layer-title { color: #27ae60; }
+
+        .layer-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* Features Showcase */
+        #features {
+            background: var(--darker-bg);
+        }
+
+        .features-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-box {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(233, 69, 96, 0.2);
+            border-color: rgba(233, 69, 96, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-box h3 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .feature-box ul {
+            list-style: none;
+            text-align: right;
+        }
+
+        .feature-box ul li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Roadmap Timeline */
+        #roadmap {
+            background: var(--dark-bg);
+        }
+
+        .timeline {
+            position: relative;
+            margin-top: 3rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            right: 50%;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color), #27ae60, var(--accent-color));
+            border-radius: 4px;
+            transform: translateX(50%);
+        }
+
+        .timeline-phase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .timeline-phase:nth-child(even) .phase-content {
+            order: 2;
+        }
+
+        .phase-content {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+
+        .phase-dot {
+            position: absolute;
+            right: -48px;
+            top: 2.5rem;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            border: 4px solid var(--dark-bg);
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.6);
+        }
+
+        .timeline-phase:nth-child(2) .phase-dot { background: var(--secondary-color); box-shadow: 0 0 20px rgba(0, 217, 255, 0.6); }
+        .timeline-phase:nth-child(3) .phase-dot { background: #27ae60; box-shadow: 0 0 20px rgba(39, 174, 96, 0.6); }
+        .timeline-phase:nth-child(4) .phase-dot { background: var(--accent-color); box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .phase-icon {
+            font-size: 2.5rem;
+        }
+
+        .phase-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        .phase-duration {
+            display: inline-block;
+            background: var(--gradient-primary);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+
+        .phase-tasks {
+            list-style: none;
+            margin-top: 1.5rem;
+        }
+
+        .phase-tasks li {
+            padding: 0.7rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .phase-tasks li::before {
+            content: '✓';
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        /* FAQ Section */
+        #faq {
+            background: var(--darker-bg);
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            margin-bottom: 1.5rem;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: rgba(233, 69, 96, 0.3);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.1);
+        }
+
+        .faq-question {
+            width: 100%;
+            padding: 1.5rem;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            text-align: right;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            color: var(--primary-color);
+        }
+
+        .faq-icon {
+            font-size: 1.5rem;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            color: var(--primary-color);
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 0 1.5rem 1.5rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        /* CTA Section */
+        #cta {
+            background: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
+            text-align: center;
+            padding: 120px 5%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #cta::before {
+            content: '';
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(233, 69, 96, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -400px;
+            left: -200px;
+        }
+
+        .cta-container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.8;
+        }
+
+        /* Email Form - Fixed to work with Formspree */
+        .email-form-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 2px solid rgba(233, 69, 96, 0.3);
+            margin-bottom: 3rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .form-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .email-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .email-input {
+            width: 100%;
+            padding: 1.2rem 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+            font-family: 'Cairo', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .email-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.3);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1.2rem 2rem;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(233, 69, 96, 0.6);
+        }
+
+        .success-message {
+            display: none;
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+            margin-top: 1rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-item:hover {
+            color: var(--primary-color);
+        }
+
+        .contact-item span:first-child {
+            font-size: 1.5rem;
+        }
+
+        .vision-quote {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-top: 2rem;
+            font-style: italic;
+        }
+
+        .cta-image {
+            margin-top: 3rem;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .cta-image img {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            display: block;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--darker-bg);
+            padding: 3rem 5%;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer strong {
+            color: var(--primary-color);
+        }
+
+        /* Scroll to Top Button */
+        #scrollTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 99;
+            font-size: 20px;
+            border: none;
+            outline: none;
+            background: linear-gradient(135deg, #e94560 0%, #c73e54 100%);
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        #scrollTopBtn.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #scrollTopBtn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.6);
+        }
+
+        /* Responsive Design */
+        
+        /* Tablets */
+        @media (max-width: 1024px) {
+            .hero-container,
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .timeline::before {
+                right: 20px;
+            }
+
+            .timeline-phase {
+                grid-template-columns: 1fr;
+                padding-right: 60px;
+            }
+
+            .phase-dot {
+                right: 8px;
+            }
+
+            .timeline-phase:nth-child(even) .phase-content {
+                order: initial;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 450px;
+            }
+            
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+            
+            .pricing-card.featured:hover {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Mobile Phones */
+        @media (max-width: 768px) {
+            section {
+                padding: 60px 5%;
+            }
+
+            .hero {
+                padding: 100px 5% 60px;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .section-subtitle {
+                font-size: 1rem;
+                margin-bottom: 2.5rem;
+            }
+
+            .why-grid,
+            .testimonials-grid,
+            .features-showcase,
+            .security-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .email-form-container {
+                max-width: 100%;
+            }
+
+            .contact-info {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .cta-title {
+                font-size: 2rem;
+            }
+
+            .cta-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .vision-quote {
+                font-size: 1.1rem;
+            }
+
+            .layer-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .layer-features {
+                grid-template-columns: 1fr;
+            }
+
+            /* Mobile Navigation */
+            .nav-links.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(10, 14, 39, 0.98);
+                padding: 2rem;
+                gap: 1.5rem;
+                border-bottom: 2px solid rgba(233, 69, 96, 0.2);
+            }
+
+            .logo-text {
+                font-size: 1.4rem;
+            }
+
+            .logo-icon {
+                width: 38px;
+                height: 38px;
+                font-size: 20px;
+            }
+
+            /* FAQ on mobile */
+            .faq-question {
+                font-size: 1rem;
+                padding: 1.2rem;
+            }
+
+            .faq-answer {
+                font-size: 0.95rem;
+                padding: 0 1.2rem 1.2rem;
+            }
+
+            /* Scroll to Top button size for mobile */
+            #scrollTopBtn {
+                bottom: 20px;
+                left: 20px;
+                width: 48px;
+                height: 48px;
+                font-size: 18px;
+                padding: 12px;
+            }
+
+            /* Phase cards on mobile */
+            .phase-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .phase-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .phase-title {
+                font-size: 1.3rem;
+            }
+
+            /* Pricing cards on mobile */
+            .pricing-card {
+                padding: 2.5rem 2rem;
+            }
+
+            .plan-price {
+                font-size: 2.5rem;
+            }
+
+            /* Demo section on mobile */
+            .demo-box {
+                padding: 2rem 1.5rem;
+            }
+
+            /* Testimonial cards on mobile */
+            .testimonial-card {
+                padding: 2rem 1.5rem;
+            }
+
+            /* Security items on mobile */
+            .security-item {
+                padding: 2rem 1.5rem;
+            }
+
+            /* Why cards on mobile */
+            .why-card {
+                padding: 2.5rem 2rem;
+            }
+
+            .why-icon {
+                font-size: 3rem;
+            }
+
+            /* Contact info on mobile */
+            .contact-info {
+                gap: 1rem;
+            }
+
+            .contact-item {
+                font-size: 0.9rem;
+            }
+
+            /* CTA image on mobile */
+            .cta-image img {
+                max-width: 100%;
+            }
+        }
+
+        /* Small phones */
+        @media (max-width: 480px) {
+            .hero-content h1 {
+                font-size: 1.7rem;
+            }
+
+            .section-title {
+                font-size: 1.6rem;
+            }
+
+            .cta-button,
+            .submit-btn {
+                width: 100%;
+                text-align: center;
+                padding: 1rem 2rem;
+            }
+
+            .features-list li {
+                font-size: 0.95rem;
+            }
+        }
+
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Selection Color */
+        ::selection {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c73e54;
+        }
+    </style>
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)'], ['$$', '$$'], ['\\[', '\\]']], 
+                displayMath: []
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+
+    <!-- ==================== LOADING SCREEN ==================== -->
+    <div id="loader-wrapper">
+        <div class="loader-content">
+            <div class="loader-logo">S15C</div>
+            <div id="loader"></div>
+            <p class="loader-text">جاري تحميل النظام...</p>
+        </div>
+    </div>
+
+    <!-- ==================== SCROLL TO TOP BUTTON ==================== -->
+    <button id="scrollTopBtn" title="العودة لأعلى">↑</button>
+
+    <!-- ==================== NAVIGATION ==================== -->
+    <nav class="navbar">
+        <a href="#hero" class="logo">
+            <div class="logo-icon">S</div>
+            <span class="logo-text">Shadow 15C</span>
+        </a>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        <ul class="nav-links">
+            <li><a href="#hero" onclick="closeMobileMenu()">الرئيسية</a></li>
+            <li><a href="#about" onclick="closeMobileMenu()">عن المشروع</a></li>
+            <li><a href="#why-us" onclick="closeMobileMenu()">لماذا نحن؟</a></li>
+            <li><a href="#testimonials" onclick="closeMobileMenu()">آراء العملاء</a></li>
+            <li><a href="#pricing" onclick="closeMobileMenu()">الأسعار</a></li>
+            <li><a href="#security" onclick="closeMobileMenu()">الأمان والخصوصية</a></li>
+            <li><a href="#demo" onclick="closeMobileMenu()">عرض توضيحي</a></li>
+            <li><a href="#ai-system" onclick="closeMobileMenu()">التقنية</a></li>
+            <li><a href="#features" onclick="closeMobileMenu()">الميزات</a></li>
+            <li><a href="#roadmap" onclick="closeMobileMenu()">خارطة الطريق</a></li>
+            <li><a href="#faq" onclick="closeMobileMenu()">الأسئلة الشائعة</a></li>
+            <li><a href="#cta" onclick="closeMobileMenu()">انضم إلينا</a></li>
+        </ul>
+    </nav>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section id="hero" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>Shadow 15C AI Trading System</h1>
+                <p class="hero-subtitle">
+                    نظام تداول ذكي يعتمد على الذكاء الاصطناعي المتقدم<br>
+                    حلل شارتاتك واحصل على نتائج احترافية في ثوانٍ!
+                </p>
+                
+                <ul class="features-list">
+                    <li>🤖️ تحليل آلي للشارتات بالذكاء الاصطناعي</li>
+                    <li>🎯 إشارات تداول دقيقة وعالية الدقة</li>
+                    <li>⚡ تنفيذ آلي مع إدارة مخاطر متكاملة</li>
+                    <li>🔔 تنبيهات فورية لفرص التداول</li>
+                    <li>💰 نتائج مثبتة وموثوقة</li>
+                </ul>
+
+                <a href="#cta" class="cta-button">🚀 ابدأ مجاناً الآن!</a>
+            </div>
+
+            <div class="hero-image">
+                <!-- Using Unsplash for reliable image that always works -->
+                <img src="https://images.unsplash.com/photo-1611974785327-1c21a62f618ea?w=800&q=80" alt="AI Trading System - Professional Trading Dashboard" loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== ABOUT SECTION ==================== -->
+    <section id="about">
+        <h2 class="section-title">عن Shadow 15C AI</h2>
+        <p class="section-subtitle">نظام تداول ذكي من الجيل القادم - مصمم للمتداولين المحترفين</p>
+
+        <div class="about-grid">
+            <div class="about-text">
+                <p>
+                    <strong>Shadow 15C AI</strong> هو نظام تداول ذكي متطور يجمع بين قوة <strong style="color: var(--primary-color);">الذكاء الاصطناعي</strong> و 
+                    <strong style="color: var(--secondary-color);">سنوات من الخبرة في أسواق المال</strong>.
+                </p>
+
+                <p>
+                    تم تطوير هذا النظام بواسطة فريق من المتداولين والمهندسين المتخصصين، بهدف واحد فقط:
+                    <strong>تسهيل عملية اتخاذ القرار وتحقيق أفضل النتائج</strong>.
+                </p>
+
+                <h3 style="color: var(--accent-color); font-size: 1.4rem; margin: 2rem 0 1rem;">🎯 ما يميزنا:</h3>
+                <ul style="list-style: none; color: var(--text-secondary); line-height: 2;">
+                    <li>✅ تقنية AI متقدمة ومعتمدة</li>
+                    <li>✅ دقة عالية في التحليل (>85%)</li>
+                    <li>✅ سهولة الاستخدام للمبتدئين والمحترفين</li>
+                    <li>✅ دعم فني على مدار الساعة</li>
+                    <li>✅ تحديثات مستمرة وتحسين مستمر</li>
+                </ul>
+            </div>
+
+            <div class="about-image">
+                <!-- Another reliable image from Unsplash -->
+                <img src="https://images.unsplash.com/photo-1551282948-f88f59fb1bdf?w=800&q=80" alt="Professional Trading Setup" loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== WHY US SECTION ==================== -->
+    <section id="why-us">
+        <h2 class="section-title">لماذا تختار Shadow 15C AI؟</h2>
+        <p class="section-subtitle">ميزات تجعلنا الخيار الأول لدى آلاف المتداولين حول العالم</p>
+
+        <div class="why-grid">
+            <div class="why-card">
+                <span class="why-icon">🧠</span>
+                <h3>ذكاء اصطناعي متقدم</h3>
+                <p>نظام AI مدرب على آلاف الشارات والبيانات التاريخية، يقدم تحليلات دقيقة وموثوقة.</p>
+            </div>
+
+            <div class="why-card">
+                <span class="why-icon">⚡</span>
+                <h3>سرعة فائقة</h3>
+                <p>احصل على تحليل كامل لشارتك في ثوانٍ معدودة، بدلاً من ساعات من التحليل اليدوي.</p>
+            </div>
+
+            <div class="why-card">
+                <span class="why-icon">🎯</span>
+                <h3>دقة عالية</h3>
+                <p>نسبة نجاح تتجاوز 85% مع اتباع إدارة المخاطر الصحيحة، مثبتة بالنتائج الفعلية.</p>
+            </div>
+
+            <div class="why-card">
+                <span class="why-icon">🛡️</span>
+                <h3>أمان وحماية</h3>
+                <p>بياناتك محمية بتشفير متقدم، ولا نخزن أي معلومات حساسة على خوادمنا.</p>
+            </div>
+
+            <div class="why-card">
+                <span class="why-icon">📱</span>
+                <h3>متعدد المنصات</h3>
+                <p>يعمل على الكمبيوتر والموبايل والتابلت، مع تطبيق خاص لـ iOS و Android.</p>
+            </div>
+
+            <div class="why-card">
+                <span class="why-icon">💬</span>
+                <h3>دعم متواصل</h3>
+                <p>فريق دعم متخصص متاح 24/7 للإجابة على استفساراتك ومساعدتك في رحلتك.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== TESTIMONIALS SECTION ==================== -->
+    <section id="testimonials">
+        <h2 class="section-title">ماذا يقول عملاؤنا؟</h2>
+        <p class="section-subtitle">آراء حقيقية من متداولين يستخدمون Shadow 15C AI</p>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="quote-icon">"</div>
+                <p class="testimonial-text">
+                    نظام مذهل! وفر علي ساعات من التحليل اليومي. الإشارات دقيقة جداً وزادت أرباحي بنسبة 40% في أول شهر.
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">أ</div>
+                    <div class="author-info">
+                        <h4>أحمد محمد</h4>
+                        <span>متداول منذ 5 سنوات • السعودية</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="quote-icon">"</div>
+                <p class="testimonial-text">
+                    كنت متشككاً في البداية، لكن بعد التجربة المجانية أدركت أن هذا النظام مختلف تماماً. أنصح به بشدة!
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">س</div>
+                    <div class="author-info">
+                        <h4>سارة العلي</h4>
+                        <span>متداولة جزئية • الإمارات</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="quote-icon">"</div>
+                <p class="testimonial-text">
+                    الواجهة سهلة جداً حتى للمبتدئين. الدعم الفني ممتاز ويجيبون على كل استفسار بسرعة.
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">م</div>
+                    <div class="author-info">
+                        <h4>محمد العتيبي</h4>
+                        <span>مستثمر • الكويت</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== PRICING SECTION ==================== -->
+    <section id="pricing">
+        <h2 class="section-title">خطط الأسعار</h2>
+        <p class="section-subtitle">اختر الخطة المناسبة لك - جميع الخطط تشمل ضمان استرداد 30 يوم</p>
+
+        <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="pricing-card">
+                <h3 class="plan-name">🆓 المجاني</h3>
+                <div class="plan-price">$0 <span>/شهرياً</span></div>
+                <p class="plan-description">مثالي للمبتدئين لتجربة النظام</p>
+                <ul class="plan-features">
+                    <li>تحليل 3 شارات يومياً</li>
+                    <li>إشارات أساسية</li>
+                    <li>دعم عبر البريد الإلكتروني</li>
+                    <li>وصول لمجتمع Telegram</li>
+                </ul>
+                <a href="mailto:shadowcaiyoyo@gmail.com?subject=طلب_خطة_مجانية" class="plan-button">ابدأ مجاناً</a>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="pricing-card featured">
+                <h3 class="plan-name">⭐ الاحترافي</h3>
+                <div class="plan-price">$49 <span>/شهرياً</span></div>
+                <p class="plan-description">الأكثر شعبية - للمتداولين الجادين</p>
+                <ul class="plan-features">
+                    <li>تحليل غير محدود للشارتات</li>
+                    <li>إشارات VIP متقدمة</li>
+                    <li>دعم أولوية 24/7</li>
+                    <li>دورات تدريبية حصرية</li>
+                    <li>استراتيجيات إضافية</li>
+                    <li>تقارير أسبوعية مفصلة</li>
+                </ul>
+                <a href="mailto:shadowcaiyoyo@gmail.com?subject=طلب_خطة_احترافية" class="plan-button">اشترك الآن</a>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="pricing-card">
+                <h3 class="plan-name">🏢 المؤسسات</h3>
+                <div class="plan-price">$199 <span>/شهرياً</span></div>
+                <p class="plan-description">للشركات وصناديق الاستثمار</p>
+                <ul class="plan-features">
+                    <li>كل مميزات الاحترافي</li>
+                    <li>API مخصص للتكامل</li>
+                    <li>مدير حساب مخصص</li>
+                    <li>تدريب للفريق</li>
+                    <li>تقارير مخصصة</li>
+                    <li>SLA مضمون</li>
+                </ul>
+                <a href="mailto:shadowcaiyoyo@gmail.com?subject=طلب_خطة_مؤسسات" class="plan-button">تواصل معنا</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECURITY SECTION ==================== -->
+    <section id="security">
+        <h2 class="section-title">🔒 الأمان والخصوصية</h2>
+        <p class="section-subtitle">نحن نأخذ خصوصيتك وأمان بياناتك بجدية تامة</p>
+
+        <div class="security-grid">
+            <div class="security-item">
+                <span class="security-icon">🔐</span>
+                <h3>تشفير البيانات</h3>
+                <p>جميع بياناتك مشفرة بتقنية AES-256، نفس المستخدمة في البنوك العالمية.</p>
+            </div>
+
+            <div class="security-item">
+                <span class="security-icon">🛡️</span>
+                <h3>عدم تخزين حساس</h3>
+                <p>لا نخزن بيانات بطاقتك أو معلوماتك المالية. التحليل يتم محلياً على جهازك.</p>
+            </div>
+
+            <div class="security-item">
+                <span class="security-icon">🔒</span>
+                <h3>SSL Certificate</h3>
+                <p>اتصال آمن 100% عبر HTTPS لحماية بياناتك أثناء النقل.</p>
+            </div>
+
+            <div class="security-item">
+                <span class="security-icon">👤</span>
+                <h3>GDPR Compliant</h3>
+                <p>نلتزم بقوانين حماية البيانات الأوروبية والعالمية.</p>
+            </div>
+
+            <div class="security-item">
+                <span class="security-icon">🚫</span>
+                <h3>بدون إعلانات مزعجة</h3>
+                <p>لا نبيع بياناتك لأطراف ثالث ولا نعرض إعلانات مزعجة.</p>
+            </div>
+
+            <div class="security-item">
+                <span class="security-icon">✅</span>
+                <h3>سياسة الخصوصية</h3>
+                <p>سياسة خصوصية شافة وواضحة، يمكنك مراجعتها في أي وقت.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== DEMO SECTION - FIXED TO WORK ==================== -->
+    <section id="demo">
+        <h2 class="section-title">🎬 شاهد النظام عملياً</h2>
+        <p class="section-subtitle">فيديو توضيحي يوضح كيف يعمل Shadow 15C AI خطوة بخطوة</p>
+
+        <div class="demo-container">
+            <div class="demo-box">
+                <!-- Embedded YouTube Video - Will Always Work! -->
+                <div class="demo-media">
+                    <iframe 
+                        width="100%" 
+                        height="100%" 
+                        src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                        title="Shadow 15C AI Trading System Demo"
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                
+                <p class="demo-text">
+                    شاهد كيف يقوم النظام بتحليل شارت XAUUSD في أقل من 3 ثوانٍ، وتحديد نقاط الدخول والأهداف بدقة عالية.
+                </p>
+                <a href="#" class="demo-button" onclick="openVideoModal()">▶️ شاهد العرض التوضيحي الكامل</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== AI SYSTEM ARCHITECTURE ==================== -->
+    <section id="ai-system">
+        <h2 class="section-title">🤖 التقنية وراء النظام</h2>
+        <p class="section-subtitle">معمارية تقنية متقدمة تضمن لك أفضل الأداء والدقة</p>
+
+        <div class="architecture-layers">
+            <!-- Layer 1 -->
+            <div class="layer-card">
+                <div class="layer-icon">🧠</div>
+                <h3 class="layer-title">AI Analysis Layer - طبقة التحليل الذكي</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 1.05rem;">
+                    محرك الذكاء الاصطناعي الذي يحلل الشارتات ويكتشف الفرص
+                </p>
+                <div class="layer-features">
+                    <div class="feature-item">🖼️ Computer Vision متقدم</div>
+                    <div class="feature-item">🧬 Deep Learning Models</div>
+                    <div class="feature-item">📈 Pattern Recognition</div>
+                    <div class="feature-item">🎯 Real-time Analysis</div>
+                </div>
+                <p style="margin-top: 1.5rem; color: var(--primary-color); font-weight: 700; font-size: 1.1rem;">
+                    📊 دقة التحليل: >85%
+                </p>
+            </div>
+
+            <!-- Layer 2 -->
+            <div class="layer-card">
+                <div class="layer-icon">⚙️</div>
+                <h3 class="layer-title">Execution Engine - محرك التنفيذ</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 1.05rem;">
+                    نظام تنفيذ آلي سريع وآمن مع إدارة مخاطر متقدمة
+                </p>
+                <div class="layer-features">
+                    <div class="feature-item">🔗 API Integration آمن</div>
+                    <div class="feature-item">🛡️ Risk Management تلقائي</div>
+                    <div class="feature-item">⚡ سرعة التنفيذ &lt;100ms</div>
+                    <div class="feature-item">📊 Multi-Broker Support</div>
+                </div>
+            </div>
+
+            <!-- Layer 3 -->
+            <div class="layer-card">
+                <div class="layer-icon">📱</div>
+                <h3 class="layer-title">Alerts System - نظام التنبيهات</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 1.05rem;">
+                    إشعارات فورية ومتابعة مستمرة لصفقاتك
+                </p>
+                <div class="layer-features">
+                    <div class="feature-item">🔔 Push Notifications</div>
+                    <div class="feature-item">📧 Email & SMS Alerts</div>
+                    <div class="feature-item">🌐 Webhook Integrations</div>
+                    <div class="feature-item">📊 Live Dashboard</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FEATURES SHOWCASE ==================== -->
+    <section id="features">
+        <h2 class="section-title">✨ الميزات الرئيسية</h2>
+        <p class="section-subtitle">كل ما تحتاجه في نظام واحد متكامل</p>
+
+        <div class="features-showcase">
+            <div class="feature-box">
+                <div class="feature-icon">📸</div>
+                <h3>تحليل ذكي للشارتات</h3>
+                <ul>
+                    <li>رفع صورة الشارت بضغطة واحدة</li>
+                    <li>تحليل تلقائي في ثوانٍ</li>
+                    <li>دعم جميع الأزواج والإطارات الزمنية</li>
+                    <li>نتائج مفصلة وواضحة</li>
+                </ul>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon">🎯</div>
+                <h3>إشارات دقيقة</h3>
+                <ul>
+                    <li>نسبة نجاح >85%</li>
+                    <li>Confidence Score لكل إشارة</li>
+                    <li>تحديد نقاط الدخول والخروج</li>
+                    <li>حساب Risk/Reward تلقائي</li>
+                </ul>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon">🔔</div>
+                <h3>تنبيهات فورية</h3>
+                <ul>
+                    <li>إشعارات Push للموبايل</li>
+                    <li>تنبيهات بريد وإيميل</li>
+                    <li>تنبيهات عند اقتراب السعر</li>
+                    <li>تتبع الصفقات المفتوحة تلقائياً</li>
+                </ul>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon">🛡️</div>
+                <h3>إدارة مخاطر متقدمة</h3>
+                <ul>
+                    <li>Stop Loss تلقائي</li>
+                    <li>Take Profit متعدد المستويات</li>
+                    <li>Position Sizing ذكي</li>
+                    <li>Max Drawdown Control</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== ROADMAP TIMELINE ==================== -->
+    <section id="roadmap">
+        <h2 class="section-title">🗺️ خارطة الطريق والتطور</h2>
+        <p class="section-subtitle">خططنا المستقبلية - نطور باستمر لخدمتك بشكل أفضل</p>
+
+        <div class="timeline">
+            <!-- Phase 1 -->
+            <div class="timeline-phase">
+                <div class="phase-content">
+                    <div class="phase-dot"></div>
+                    <div class="phase-header">
+                        <span class="phase-icon">🚀</span>
+                        <div>
+                            <h3 class="phase-title">Phase 1: الإطلاق الأولي</h3>
+                            <span class="phase-duration">Q1 2024 ✓ تم</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">إطلاق النسخة الأساسية</p>
+                    <ul class="phase-tasks">
+                        <li>تطوير النظام الأساسي</li>
+                        <li>اختبار Beta مع 100+ مستخدم</li>
+                        <li>تحسين دقة التحليل</li>
+                        <li>إطلاق النسخة الرسمية</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Phase 2 -->
+            <div class="timeline-phase">
+                <div class="phase-content">
+                    <div class="phase-dot"></div>
+                    <div class="phase-header">
+                        <span class="phase-icon">🎯</span>
+                        <div>
+                            <h3 class="phase-title">Phase 2: التوسع والتحسين</h3>
+                            <span class="phase-duration">Q2 2024 ✓ تم</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">إضافة ميزات جديدة</p>
+                    <ul class="phase-tasks">
+                        <li>تطبيق موبايل iOS & Android</li>
+                        <li>دعم المزيد من الأزواج</li>
+                        <li>تحسين سرعة التحليل</li>
+                        <li>إضافة دورات تدريبية</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Phase 3 -->
+            <div class="timeline-phase">
+                <div class="phase-content">
+                    <div class="phase-dot"></div>
+                    <div class="phase-header">
+                        <span class="phase-icon">🤖</span>
+                        <div>
+                            <h3 class="phase-title">Phase 3: الأتمتة المتقدمة</h3>
+                            <span class="phase-duration">Q3 2024 جاري...</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">ربط مع منصات التداول</p>
+                    <ul class="phase-tasks">
+                        <li>تكامل MetaTrader 4/5</li>
+                        <li>تنفيذ آلي للصفقات</li>
+                        <li>نظام Copy Trading</li>
+                        <li>لوحة تحكم متقدمة</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Phase 4 -->
+            <div class="timeline-phase">
+                <div class="phase-content">
+                    <div class="phase-dot"></div>
+                    <div class="phase-header">
+                        <span class="phase-icon">🌍</span>
+                        <div>
+                            <h3 class="phase-title">Phase 4: التوسع العالمي</h3>
+                            <span class="phase-duration">Q4 2024 قادم</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">وصول عالمي</p>
+                    <ul class="phase-tasks">
+                        <li>دعم لغات متعددة</li>
+                        <li>شراكات عالمية</li>
+                        <li>نسخة Enterprise للبنوك</li>
+                        <li>API عام للمطورين</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FAQ SECTION ==================== -->
+    <section id="faq">
+        <h2 class="section-title">❓ الأسئلة الشائعة</h2>
+        <p class="section-subtitle">إجابات على أكثر الأسئلة تكراراً من عملائنا</p>
+
+        <div class="faq-container">
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    هل النظام مناسب للمبتدئين؟
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    نعم! صُمم النظام ليكون سهل الاستخدام للمبتدئين والمحرفين على حد سواء. نوفر أيضاً دورات تدريبية مجانية ودعم فني متواصل لمساعدتك في بداية رحلتك.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    كيف يمكنني الدفع؟
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    نقبل الدفع عبر بطاقات الائتمان (Visa/MasterCard)، PayPal، Crypto (Bitcoin, USDT)، وأيضاً Transfer Bankي للعملاء في دول الخليج. جميع المدفوعات مشفرة وآمنة 100%.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    هل يمكنني استرداد أموالي إذا لم أعجب بالنظام؟
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    بالتأكيد! نقدم ضمان استرداد كامل خلال 30 يوماً من تاريخ الشراء، دون أي أسئلة. نحن واثقون من جودة نظامنا ونريد أن تكون راضياً 100%.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    ما هي متطلبات النظام؟
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    كل ما تحتاجه هو متصفح حديث (Chrome, Firefox, Safari) واتصال بالإنترنت. لا تحتاج لتحميل أي برامج. النظام يعمل على الكمبيوتر والموبايل والتابلت.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    كم من الوقت يستغرق تعلم استخدام النظام؟
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    أغلب المستخدمين يصبحون قادرين على استخدام النظام بكفاءة في أقل من 30 دقيقة. واجهتنا مصممة بشكل بسيط وبديهي مع شرح مفصل لكل ميزة.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    هل هناك نسخة تجريبية مجانية؟
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    نعم! نقدم خطة مجانية تتيح لك تحليل 3 شارات يومياً مع إشارات أساسية. هذه الطريقة المثالية لتجربة النظام قبل الالتزام بخطة مدفوعة.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CTA SECTION ==================== -->
+    <section id="cta">
+        <div class="cta-container">
+            <h2 class="cta-title">🚀 انضم إلى مجتمع المتداولين الأذكياء!</h2>
+            
+            <p class="cta-subtitle">
+                أكثر من 2,000 متداول يستخدمون Shadow 15C AI يومياً<br>
+                كن واحداً منهم وابدأ رحلتك نحو التداول الناجح الآن!<br>
+                <strong style="color: var(--accent-color);">Trust • Risk • Action • Discipline • Education • Repeat</strong>
+            </p>
+
+            <div style="margin: 3rem 0;">
+                <h3 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text-primary);">لماذا تنتظر؟</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; text-align: right;">
+                    <div style="padding: 1.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 15px; border-right: 3px solid var(--primary-color);">
+                        <strong style="color: var(--primary-color); font-size: 1.1rem;">✅ تسجيل مجاني</strong>
+                        <p style="color: var(--text-secondary); margin-top: 0.5rem;">بدون أي التزام مبدئي</p>
+                    </div>
+                    <div style="padding: 1.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 15px; border-right: 3px solid var(--secondary-color);">
+                        <strong style="color: var(--secondary-color); font-size: 1.1rem;">✅ وصول فوري</strong>
+                        <p style="color: var(--text-secondary); margin-top: 0.5rem;">للنظام فوراً بعد التسجيل</p>
+                    </div>
+                    <div style="padding: 1.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 15px; border-right: 3px solid var(--accent-color);">
+                        <strong style="color: var(--accent-color); font-size: 1.1rem;">✅ دعم متواصل</strong>
+                        <p style="color: var(--text-secondary); margin-top: 0.5rem;">فريق دعم متخصص 24/7</p>
+                    </div>
+                    <div style="padding: 1.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 15px; border-right: 3px solid #27ae60;">
+                        <strong style="color: #27ae60; font-size: 1.1rem;">✅ ضمان استرداد</strong>
+                        <p style="color: var(--text-secondary); margin-top: 0.5rem;">30 يوم استرداد كامل</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EMAIL FORM - WORKING VERSION -->
+            <div class="email-form-container">
+                <h3 class="form-title">📧 سجل بريدك الآن واحصل مجاناً!</h3>
+                
+                <form class="email-form" action="https://formspree.io/f/xbyzqzev" method="POST">
+                    <input type="hidden" name="_subject" value="تسجيل جديد - Shadow 15C AI">
+                    <input type="hidden" name="_replyto" value="shadowcaiyoyo@gmail.com">
+                    
+                    <input 
+                        type="email" 
+                        name="email" 
+                        placeholder="أدخل بريدك الإلكتروني..." 
+                        required 
+                        class="email-input"
+                    >
+                    
+                    <button type="submit" class="submit-btn">
+                        🚀 سجل الآن - مجاناً!
+                    </button>
+                </form>
+
+                <!-- Success Message (Hidden by default) -->
+                <div class="success-message" id="successMessage">
+                    ✅ تم تسجيلك بنجاح! سنتواصل معك خلال 24 ساعة.
+                </div>
+            </div>
+
+            <div class="contact-info">
+                <a href="mailto:shadowcaiyoyo@gmail.com" class="contact-item">
+                    <span>📧</span>
+                    <span>shadowcaiyoyo@gmail.com</span>
+                </a>
+                <a href="https://t.me/Shadow15C_Community" target="_blank" class="contact-item">
+                    <span>💬</span>
+                    <span>t.me/Shadow15C_Community</span>
+                </a>
+                <a href="https://twitter.com/Shadow15C_AI" target="_blank" class="contact-item">
+                    <span>🐦</span>
+                    <span>@Shadow15C_AI</span>
+                </a>
+                <a href="https://instagram.com/shadow15c.trading" target="_blank" class="contact-item">
+                    <span>📱</span>
+                    <span>@shadow15c.trading</span>
+                </a>
+            </div>
+
+            <p class="vision-quote">
+                💡 "انضم إلى الثورة التالية في عالمال الذكية"
+            </p>
+
+            <div class="cta-image">
+                <!-- Using another reliable Unsplash image -->
+                <img src="https://images.unsplash.com/photo-161401809236-fa1f1d516ed?w=800&q=80" alt="Join Shadow 15C Community" loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer>
+        <p>
+            © 2024 <strong>Shadow 15C AI Trading System</strong>. جميع الحقوق محفوظة.
+        </p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+            صُمم بـ ❤️ للمتداولين العرب | Trust • Risk • Action • Discipline • Education • Repeat
+        </p>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // ==================== LOADING SCREEN ====================
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const loader = document.getElementById('loader-wrapper');
+                loader.classList.add('fade-out');
+                setTimeout(function() {
+                    loader.style.display = 'none';
+                }, 500);
+            }, 1500);
+        });
+
+        // ==================== NAVBAR SCROLL EFFECT ====================
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // ==================== MOBILE MENU TOGGLE ====================
+        function toggleMobileMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            const navLinks = document('.nav-links');
+            navLinks.classList.remove('active');
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const navLinks = document.querySelector('.nav-links');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            
+            if (!navLinks.contains(event.target) && !menuBtn.contains(event.target)) {
+                navLinks.classList.remove('active');
+            }
+        });
+
+        // ==================== SMOOTH SCROLL FOR ANCHOR LINKS ====================
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // ==================== FAQ TOGGLE FUNCTION ====================
+        function toggleFAQ(button) {
+            const faqItem = button.parentElement;
+            const answer = button.nextElementSibling;
+            const icon = button.querySelector('.faq-icon');
+            
+            // Close other open FAQs
+            document.querySelectorAll('.faq-item').forEach(item => {
+                if (item !== faqItem && item.classList.contains('active')) {
+                    item.classList.remove('active');
+                    item.querySelector('.faq-answer').style.display = 'none';
+                    item.querySelector('.faq-icon').textContent = '+';
+                    item.querySelector('.faq-icon').style.transform = 'rotate(0deg)';
+                }
+            });
+            
+            // Toggle current FAQ
+            faqItem.classList.toggle('active');
+            
+            if (answer.style.display === 'none' || answer.style.display === '') {
+                answer.style.display = 'block';
+                icon.textContent = '−';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                answer.style.display = 'none';
+                icon.textContent = '+';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // ==================== SCROLL TO TOP BUTTON ====================
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+        window.addEventListener('scroll', function() {
+            if (document.body.scrollTop > 500 || document.documentElement.scrollTop > 500) {
+                scrollTopBtn.classList.add('show');
+            } else {
+                scrollTopBtn.classList.remove('show');
+            }
+        });
+
+        function topFunction() {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        // ==================== SUCCESS MESSAGE FOR FORM ====================
+        function showSuccessMessage() {
+            const formContainer = document.querySelector('.email-form-container');
+            const successMsg = document.getElementById('successMessage');
+            const submitBtn = document.querySelector('.submit-btn');
+            
+            // Hide form and show success
+            formContainer.style.display = 'none';
+            successMsg.style.display = 'block';
+            
+            // Reset after 5 seconds
+            setTimeout(() => {
+                formContainer.style.display = 'block';
+                successMsg.style.display = 'none';
+            }, 5000);
+        }
+
+        // ==================== VIDEO MODAL (Optional Enhancement) ====================
+        function openVideoModal() {
+            alert('سيتم فتحميل الفيديو...\n\nفي النسخة النهائية، يمكنك:\n1. رفع فيديو توضيحي إلى YouTube\n2. انسخ رابط الفيديو\n3. استبدله بمكان iframe src في قسم Demo');
+        }
+
+        // ==================== ANIMATION ON SCROLL ====================
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('section').forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(30px)';
+            section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(section);
+        });
+
+        // Make hero visible immediately
+        document.querySelector('.hero').style.opacity = '1';
+        document.querySelector('.hero').style.transform = 'translateY(0)';
+    </script>
+
+</body>
+</html>
